@@ -4,11 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
     "prettier": "^1.12.1"
   },
   "dependencies": {
-    "graphql": "^0.13.2"
+    "graphql": "^0.13.2",
+    "graphql-tools": "^3.0.0"
+  },
+  "scripts": {
+    "test": "eslint src/ && jest"
   }
 }
