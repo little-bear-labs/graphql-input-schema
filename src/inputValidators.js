@@ -1,5 +1,5 @@
-function IsLength(arg) {
-  console.log(arguments, ' RUN TEH VALIDATORRRRR');
+function IsLength(value, config) {
+  return value;
 }
 
 module.exports = {

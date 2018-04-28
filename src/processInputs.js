@@ -30,10 +30,14 @@ function extractInputClass(source, node) {
 function createValidator(name, fields) {
   return object => {
     // do validation here later...
-    return Object.entries(object).reduce((sum, [key, value]) => {
-      console.log(fields);
+    const out = Object.entries(object).reduce((sum, [key, value]) => {
+      const { fieldValidators } = fields[key];
+      sum[key] = fieldValidators.reduce((sum, validator) => {
+        return validator.function(value, validator.args);
+      }, value);
       return sum;
     }, {});
+    return out;
   };
 }
 
@@ -42,7 +46,6 @@ function processFieldDirective(source, field, node, { validators }) {
 
   // not our directive so return the node and move on.
   if (!validators[directiveName]) {
-    console.log('no validator for', directiveName);
     return node;
   }
 
@@ -83,6 +86,10 @@ function processInput(source, doc, config) {
         return node;
       },
       leave(node) {
+        inputObj.fields = inputObj.fields.reduce((sum, field) => {
+          sum[field.name] = field;
+          return sum;
+        }, {});
         inputMapping[inputObj.name] = inputObj;
         inputObj = null;
         return node;
@@ -123,7 +130,8 @@ function processInput(source, doc, config) {
   const inputs = Object.entries(inputMapping).reduce(
     (sum, [inputName, input]) => {
       // resolve any outstanding references to input types in the validators.
-      const fields = input.fields
+      const inputFieldMap = {};
+      Object.values(input.fields)
         .map(field => {
           const { type, isCustomType } = field;
           // if it's not some kind of custom input type then move on.
@@ -141,17 +149,24 @@ function processInput(source, doc, config) {
           // because field validators may reference other input field validators which
           // have not been fully resolved yet. Once this entire loop is finished _then_
           // the validator will be ready to be called.
-          field.fieldValidators.push(
-            createValidator(inputType.name, inputType.fields),
-          );
+          field.fieldValidators.push({
+            function: createValidator(
+              inputType.name,
+              inputMapping[inputType.name].fields,
+            ),
+            args: {},
+          });
 
           return field;
         })
-        .reduce((sum, field) => ({ ...sum, [field.name]: field }));
+        .reduce((sum, field) => {
+          sum[field.name] = field;
+          return sum;
+        }, inputFieldMap);
 
       sum[inputName] = {
         ...input,
-        validator: createValidator(inputName, fields),
+        validator: createValidator(inputName, inputFieldMap),
       };
 
       return sum;
