@@ -1,4 +1,5 @@
 const constants = require('./constants');
+const { visit } = require('graphql/language');
 const {
   extractName,
   extractArguments,
@@ -26,95 +27,139 @@ function extractInputClass(source, node) {
   );
 }
 
-function processInputType(source, node, { validators, classes }) {
-  const classType = extractInputClass(source, node);
-  // extract all field validators...
-  const fields = node.fields.map(field => {
-    const name = extractName(field);
-    const fieldValidators = field.directives.reduce(
-      (appliedValidators, directive) => {
-        const directiveName = extractName(directive);
-        if (!validators[directiveName]) return appliedValidators;
-        const args = extractArguments(directive.arguments);
-        return [
-          ...appliedValidators,
-          {
-            function: validators[directiveName],
-            args,
-          },
-        ];
-      },
-      [],
-    );
-    return {
-      name,
-      fieldValidators,
-      ...typeInfo(field),
-    };
-  });
-
-  if (classType && !classes[classType]) {
-    throw new Error(`Unhandled class : ${classType}`);
-  }
-
-  return {
-    classType,
-    classConstructor: classes[classType],
-    fields,
-  };
-}
-
 function createValidator(name, fields) {
   return object => {
     // do validation here later...
-    console.log(name, 'running validation', object);
+    return Object.entries(object).reduce((sum, [key, value]) => {
+      console.log(fields);
+      return sum;
+    }, {});
   };
 }
 
+function processFieldDirective(source, field, node, { validators }) {
+  const directiveName = extractName(node);
+
+  // not our directive so return the node and move on.
+  if (!validators[directiveName]) {
+    console.log('no validator for', directiveName);
+    return node;
+  }
+
+  field.fieldValidators.push({
+    function: validators[directiveName],
+    args: extractArguments(node.arguments),
+  });
+
+  // once we've consumed the directive then we can remove the node.
+  return null;
+}
+
+function processInputDirective(source, input, node, { classes }) {
+  const classType = extractInputClass(source, node);
+  if (classType && !classes[classType]) {
+    throw new Error(`Unhandled class : ${classType}`);
+  }
+  input.classType = classType;
+  input.classConstructor = classes[classType];
+
+  // input objects do not typically process directives. Delete the node.
+  return null;
+}
+
 function processInput(source, doc, config) {
-  // build the resolver maps...
-  const inputMapping = doc.definitions.reduce((sum, node) => {
-    switch (node.kind) {
-      case 'InputObjectTypeDefinition':
-        sum[extractName(node)] = processInputType(source, node, config);
-        break;
-    }
-    return sum;
-  }, {});
+  const inputMapping = {};
+  let inputObj = null;
+  let field = null;
 
-  return Object.entries(inputMapping).reduce((sum, [inputName, input]) => {
-    // resolve any outstanding references to input types in the validators.
-    const fields = input.fields.map(field => {
-      const { type, isCustomType } = field;
-      // if it's not some kind of custom input type then move on.
-      if (isCustomType === false) {
-        return field;
-      }
+  const inputAST = visit(doc, {
+    Document(node) {
+      return node;
+    },
+    InputObjectTypeDefinition: {
+      enter(node) {
+        const name = extractName(node);
+        inputObj = { name, fields: [] };
+        return node;
+      },
+      leave(node) {
+        inputMapping[inputObj.name] = inputObj;
+        inputObj = null;
+        return node;
+      },
+    },
+    InputValueDefinition: {
+      enter(node) {
+        if (!inputObj) return node;
+        field = {
+          name: extractName(node),
+          ...typeInfo(node),
+          fieldValidators: [],
+        };
+        return node;
+      },
+      leave(node) {
+        if (!inputObj) return node;
+        inputObj.fields.push(field);
+        field = null;
+        return node;
+      },
+    },
+    Directive: {
+      enter(node) {
+        // only process directives when we are an input object field.
+        if (!field && !inputObj) return node;
+        return node;
+      },
+      leave(node) {
+        if (field) {
+          return processFieldDirective(source, field, node, config);
+        }
+        return processInputDirective(source, inputObj, node, config);
+      },
+    },
+  });
 
-      // must be both a custom type and input type for us to apply the object validation.
-      const inputType = inputMapping[type];
-      if (!inputType) {
-        return field;
-      }
+  const inputs = Object.entries(inputMapping).reduce(
+    (sum, [inputName, input]) => {
+      // resolve any outstanding references to input types in the validators.
+      const fields = input.fields
+        .map(field => {
+          const { type, isCustomType } = field;
+          // if it's not some kind of custom input type then move on.
+          if (isCustomType === false) {
+            return field;
+          }
 
-      // XXX: Note how this is modified by reference. This is very intentional
-      // because field validators may reference other input field validators which
-      // have not been fully resolved yet. Once this entire loop is finished _then_
-      // the validator will be ready to be called.
-      field.fieldValidators.push(
-        createValidator(inputType.name, inputType.fields),
-      );
+          // must be both a custom type and input type for us to apply the object validation.
+          const inputType = inputMapping[type];
+          if (!inputType) {
+            return field;
+          }
 
-      return field;
-    });
+          // XXX: Note how this is modified by reference. This is very intentional
+          // because field validators may reference other input field validators which
+          // have not been fully resolved yet. Once this entire loop is finished _then_
+          // the validator will be ready to be called.
+          field.fieldValidators.push(
+            createValidator(inputType.name, inputType.fields),
+          );
 
-    sum[inputName] = {
-      ...input,
-      validator: createValidator(inputName, fields),
-    };
+          return field;
+        })
+        .reduce((sum, field) => ({ ...sum, [field.name]: field }));
 
-    return sum;
-  }, {});
+      sum[inputName] = {
+        ...input,
+        validator: createValidator(inputName, fields),
+      };
+
+      return sum;
+    },
+    {},
+  );
+
+  return [inputAST, inputs];
 }
 
 module.exports = processInput;

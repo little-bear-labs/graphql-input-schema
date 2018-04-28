@@ -23,20 +23,17 @@ input Empty {
   name: String
 }
 
-input OnlyFieldValidators {
-  name: String! @IsLength(min: 1)
-}
-
 type User {
   id: String!
 }
 
-type Mutations {
-  createUser(user: InputUser): User
-  createUserForReal(user: InputUser!): User
-  createString(str: String!): String
+type Mutation {
+  createUser(user: InputUser!): User
+  # createUserForReal(user: InputUser!): User
+  # createString(str: String!): String
 }
 
 type Query {
   user: User
+  enum: TheEnum
 }

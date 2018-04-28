@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { makeExecutableSchema } = require('../src/transformer');
 const { graphql } = require('graphql');
+const { printSchema } = require('graphql/utilities');
 
 describe('inputs', () => {
   it('should do things', async () => {
@@ -9,9 +10,9 @@ describe('inputs', () => {
     const resolvers = {
       User: {},
       Query: {},
-      Mutations: {
+      Mutation: {
         createUser: (root, args, ctx) => {
-          console.log(args, ctx);
+          console.log(args, '<<< SUP FOO');
         },
         createUserForReal: () => null,
         createString: () => null,
@@ -29,10 +30,9 @@ describe('inputs', () => {
 
     const result = await graphql({
       schema,
-      source: raw,
-      requestString: `
-        mutation foo(user: InputUser!) {
-          createUser(user: user) {
+      source: `
+        mutation foo($user: InputUser!) {
+          createUser(user: $user) {
             id
           }
         }

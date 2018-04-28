@@ -16,9 +16,10 @@ function buildValidateArgHandler(nullable, validator, classConstructor) {
 }
 
 function buildValidateHandler(input, typeMeta) {
-  if (!input || input.validator) {
+  if (!input || !input.validator) {
     return value => value;
   }
+
   return buildValidateArgHandler(
     typeMeta.nullable,
     input.validator,
@@ -76,9 +77,8 @@ function makeExecutableSchema({
 }) {
   // XXX: yes we do end up parsing the source twice :/
   const source = new Source(typeDefs);
-  const doc = parseGQL(source);
 
-  const inputTypes = processInputs(source, doc, {
+  const [doc, inputTypes] = processInputs(source, parseGQL(source), {
     classes,
     validators: {
       ...validators,
