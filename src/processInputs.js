@@ -7,21 +7,18 @@ const {
   typeInfo,
 } = require('./utils');
 
-function extractInputClass(source, node) {
-  const classDirective =
-    node.directives &&
-    node.directives.find(dir => {
-      const name = extractName(dir);
-      return name === 'class';
-    });
+function extractInputClass(source, directive) {
+  if (extractName(directive) !== 'class') {
+    return null;
+  }
 
-  if (!classDirective) {
+  if (!directive) {
     return null;
   }
 
   return extractDirectiveArg(
     source,
-    classDirective,
+    directive,
     constants.inputClassDirectiveArg,
     'StringValue',
   );

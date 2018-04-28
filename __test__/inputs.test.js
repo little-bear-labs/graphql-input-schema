@@ -5,14 +5,31 @@ const { printSchema } = require('graphql/utilities');
 
 describe('inputs', () => {
   it('should do things', async () => {
-    class User {}
+    let ranResolver = false;
+    class User {
+      constructor(obj) {
+        Object.assign(this, obj);
+      }
+    }
 
     const resolvers = {
-      User: {},
+      User: {
+        id(root) {
+          return root;
+        },
+      },
       Query: {},
       Mutation: {
         createUser: (root, args, ctx) => {
-          console.log(args, '<<< SUP FOO');
+          ranResolver = true;
+          expect(args.user).toBeInstanceOf(User);
+          expect(args.user).toMatchObject({
+            name: 'example',
+            input: {
+              someThing: 1,
+            },
+          });
+          return args.user;
         },
         createUserForReal: () => null,
         createString: () => null,
@@ -48,5 +65,6 @@ describe('inputs', () => {
     });
 
     console.log(result);
+    expect(ranResolver).toBeTruthy();
   });
 });
