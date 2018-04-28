@@ -20,7 +20,7 @@ describe('inputs', () => {
       },
       Query: {},
       Mutation: {
-        createUser: (root, args, ctx) => {
+        createUser: (root, args) => {
           ranResolver = true;
           expect(args.user).toBeInstanceOf(User);
           expect(args.user).toMatchObject({
