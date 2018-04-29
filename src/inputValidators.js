@@ -8,6 +8,9 @@ const SIMPLE_SINGLE = [
   'isAscii',
   'isBase64',
   'isCreditCard',
+  'IsEmail',
+  'IsFQDN',
+  'IsURL',
   'isFullWidth',
   'isHalfWidth',
   'isVariableWidth',
@@ -84,6 +87,26 @@ function ValidateLength(value, { min, max }, meta) {
   );
 }
 
+function ValidateMinLength(value, { min }, meta) {
+  return runValidatorSingleValue(
+    'minLength',
+    meta,
+    value,
+    [min],
+    () => `value must be minimum length of ${min}`,
+  );
+}
+
+function ValidateMaxLength(value, { max }, meta) {
+  return runValidatorSingleValue(
+    'maxLength',
+    meta,
+    value,
+    [max],
+    () => `value must be maximum length of ${max}`,
+  );
+}
+
 function ValidateByteLength(value, { min, max }, meta) {
   return runValidatorSingleValue(
     'isByteLength',
@@ -101,6 +124,8 @@ module.exports = {
   ValidateIsNotIn,
   ValidateLessThan,
   ValidateGreaterThan,
+  ValidateMinLength,
+  ValidateMaxLength,
 };
 
 SIMPLE_SINGLE.forEach(method => {

@@ -143,6 +143,20 @@ describe('validators', () => {
       args: 'min: 2, max: 5',
       message: '2-5',
     },
+    {
+      method: 'ValidateMinLength',
+      valid: 'aa',
+      invalid: 'a',
+      args: 'min: 2',
+      message: '2',
+    },
+    {
+      method: 'ValidateMaxLength',
+      invalid: 'aaa',
+      valid: 'a',
+      args: 'max: 2',
+      message: '2',
+    },
   ].forEach(({ method, valid, invalid, message, args }) => {
     describe(method, () => {
       const schema = makeExecutableSchema({

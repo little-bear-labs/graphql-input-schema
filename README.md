@@ -10,6 +10,10 @@ Validate if value is in list of "in"
 
 Validate if value is not in list of "in"
 
+### @ValidateMinLength(min: Int!)
+
+### @ValidateMaxLength(max: Int!)
+
 ### ValidateGreaterThan(number: Int!)
 
 ### ValidateLessThan(number: Int!)
@@ -27,6 +31,12 @@ Validate if value is not in list of "in"
 ### @ValidateIsBase64
 
 ### @ValidateIsCreditCard
+
+### @ValidateIsEmail
+
+### @ValidateIsFQDN
+
+### @ValidateIsURL
 
 ### @ValidateIsFullWidth
 
