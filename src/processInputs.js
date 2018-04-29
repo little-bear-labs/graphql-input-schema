@@ -1,14 +1,8 @@
-const constants = require('./constants');
 const { visit } = require('graphql/language');
-const {
-  extractName,
-  extractArguments,
-  extractDirectiveArg,
-  typeInfo,
-} = require('./utils');
+const { extractName, extractArguments, typeInfo } = require('./utils');
 const debug = require('debug')('graphql-super-schema:inputs');
 
-function createTransformer(name, fields, config) {
+function createFieldTransformer(name, fields, config) {
   return (object, requestConfig) => {
     // do validation here later...
     return Object.entries(object).reduce((sum, [key, value]) => {
@@ -23,6 +17,18 @@ function createTransformer(name, fields, config) {
       }, value);
       return sum;
     }, {});
+  };
+}
+
+function createObjectTransformer(input, config) {
+  return (object, requestConfig) => {
+    return input.objectValidators.reduce((sum, validator) => {
+      return validator.function(object, validator.args, {
+        type: input,
+        ...requestConfig,
+        ...config,
+      });
+    }, object);
   };
 }
 
@@ -149,7 +155,7 @@ function processInput(source, doc, config) {
           debug('create nested validator', field.type, field.name);
           field.transformers.push({
             name: 'nested',
-            function: createTransformer(
+            function: createFieldTransformer(
               inputType.name,
               inputMapping[inputType.name].fields,
               config,
@@ -164,9 +170,22 @@ function processInput(source, doc, config) {
           return sum;
         }, inputFieldMap);
 
+      const objectTransformer = createObjectTransformer(input, config);
+      const fieldsTransformer = createFieldTransformer(
+        inputName,
+        inputFieldMap,
+        config,
+      );
+
+      const transformer = (value, requestConfig) =>
+        objectTransformer(
+          fieldsTransformer(value, requestConfig),
+          requestConfig,
+        );
+
       sum[inputName] = {
         ...input,
-        fieldsTransformer: createTransformer(inputName, inputFieldMap, config),
+        transformer,
       };
 
       return sum;

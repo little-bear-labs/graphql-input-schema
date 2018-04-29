@@ -3,48 +3,30 @@ const { Source, parse: parseGQL } = require('graphql/language');
 const processInputs = require('./processInputs');
 const { extractName, resolveType } = require('./utils');
 
-function validateValue(_, value, validator, classConstructor, config) {
-  const validatedValue = validator(value, config);
-  if (!classConstructor) {
-    return validatedValue;
-  }
-  return new classConstructor(validatedValue);
-}
-
-function buildValidateArgHandler(typeMeta, validator, classConstructor) {
+function buildValidateArgHandler(typeMeta, validator) {
   return (value, config) => {
     if (typeMeta.nullable && value === null) return value;
-    return validateValue(typeMeta, value, validator, classConstructor, config);
+    return validator(value, config);
   };
 }
 
-function buildValidateArgHandlerArray(typeMeta, validator, classConstructor) {
+function buildValidateArgHandlerArray(typeMeta, validator) {
   return (array, config) => {
     if (typeMeta.nullable && array === null) return array;
-    return array.map(value =>
-      validateValue(typeMeta, value, validator, classConstructor, config),
-    );
+    return array.map(value => validator(value, config));
   };
 }
 
-function buildValidateHandler(input, typeMeta) {
-  if (!input || !input.fieldsTransformer) {
+function buildFieldTransformer(input, typeMeta) {
+  if (!input || !input.transformer) {
     return value => value;
   }
 
   if (typeMeta.list) {
-    return buildValidateArgHandlerArray(
-      typeMeta,
-      input.fieldsTransformer,
-      input.classConstructor,
-    );
+    return buildValidateArgHandlerArray(typeMeta, input.transformer);
   }
 
-  return buildValidateArgHandler(
-    typeMeta,
-    input.fieldsTransformer,
-    input.classConstructor,
-  );
+  return buildValidateArgHandler(typeMeta, input.transformer);
 }
 
 function fieldToResolver(typeName, resolvers, field, inputTypes) {
@@ -70,7 +52,7 @@ function fieldToResolver(typeName, resolvers, field, inputTypes) {
 
     return {
       ...sum,
-      [name]: buildValidateHandler(input, typeMeta),
+      [name]: buildFieldTransformer(input, typeMeta),
     };
   }, {});
 
