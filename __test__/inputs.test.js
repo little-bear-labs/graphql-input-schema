@@ -29,7 +29,12 @@ describe('inputs', () => {
     User,
   };
 
-  const loadSchema = (fixture, resolvers, fixtureClasses = classes) => {
+  const loadSchema = (
+    fixture,
+    resolvers,
+    fixtureClasses = classes,
+    validators = {},
+  ) => {
     const raw = fs.readFileSync(
       __dirname + `/graphql/${fixture}.graphql`,
       'utf8',
@@ -39,6 +44,7 @@ describe('inputs', () => {
       typeDefs: raw,
       resolvers,
       classes: fixtureClasses,
+      validators,
     });
   };
 
@@ -159,5 +165,43 @@ describe('inputs', () => {
     });
     expect(ranResolver).toBeTruthy();
     expect(result.data).toBeTruthy();
+  });
+
+  it('array level validators', async () => {
+    const resolvers = deepMerge({}, resolverFixtures, {
+      Mutation: {
+        createUser: (root, args) => {},
+      },
+    });
+
+    let ranCustomValidate = false;
+    const schema = loadSchema('inputs', resolvers, classes, {
+      CustomValidate(value) {
+        expect(value).toEqual(['a', 'b', 'c']);
+        ranCustomValidate = true;
+      },
+    });
+
+    const result = await graphql({
+      schema,
+      source: `
+        mutation foo($user: InputUser!) {
+          createUser(user: $user) {
+            id
+          }
+        }
+      `,
+      variableValues: {
+        user: {
+          name: 'aaaaaa',
+          array: ['a', 'b', 'c'],
+          input: {
+            someThing: 1,
+          },
+        },
+      },
+    });
+
+    expect(ranCustomValidate).toBe(true);
   });
 });
