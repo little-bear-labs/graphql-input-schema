@@ -4,14 +4,27 @@ const processInputs = require('./processInputs');
 const inputValidators = require('./inputValidators');
 const { extractName, resolveType } = require('./utils');
 
-function buildValidateArgHandler(nullable, validator, classConstructor) {
+function validateValue(typeMeta, value, validator, classConstructor) {
+  const validatedValue = validator(value, typeMeta);
+  if (!classConstructor) {
+    return validatedValue;
+  }
+  return new classConstructor(validatedValue);
+}
+
+function buildValidateArgHandler(typeMeta, validator, classConstructor) {
   return value => {
-    if (nullable && value === null) return value;
-    const validatedValue = validator(value);
-    if (!classConstructor) {
-      return validatedValue;
-    }
-    return new classConstructor(validatedValue);
+    if (typeMeta.nullable && value === null) return value;
+    return validateValue(typeMeta, value, validator, classConstructor);
+  };
+}
+
+function buildValidateArgHandlerArray(typeMeta, validator, classConstructor) {
+  return array => {
+    if (typeMeta.nullable && array === null) return array;
+    return array.map(value =>
+      validateValue(typeMeta, value, validator, classConstructor),
+    );
   };
 }
 
@@ -20,8 +33,16 @@ function buildValidateHandler(input, typeMeta) {
     return value => value;
   }
 
+  if (typeMeta.list) {
+    return buildValidateArgHandlerArray(
+      typeMeta,
+      input.validator,
+      input.classConstructor,
+    );
+  }
+
   return buildValidateArgHandler(
-    typeMeta.nullable,
+    typeMeta,
     input.validator,
     input.classConstructor,
   );

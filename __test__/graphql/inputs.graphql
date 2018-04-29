@@ -29,8 +29,7 @@ type User {
 
 type Mutation {
   createUser(user: InputUser!): User
-  # createUserForReal(user: InputUser!): User
-  # createString(str: String!): String
+  createUsers(users: [InputUser]!): User
 }
 
 type Query {

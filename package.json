@@ -7,6 +7,7 @@
     "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
+    "lodash.merge": "^4.6.1",
     "prettier": "^1.12.1"
   },
   "dependencies": {
