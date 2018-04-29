@@ -2,7 +2,7 @@
 
 This library uses AST rewriting techniques to provide directives for input types. The library comes with built in support to convert input types into classes (newables) and validate fields (nested & array support included) of input types. This is intended to cut down on boilerplate and make your graphql usage more declarative.
 
-Transformers will raise informational errors without returning back values passed by the client if transformers fail.
+The directives used in this library are intended to be for for transformations, validation, ACL and more.
 
 ## Usage
 
@@ -21,7 +21,7 @@ const resolvers = {
   Mutation: {
     createUser(
       root,
-      { user /* if validation passes this will be a User instance */ },
+      { user /* if no errors are thrown this will be a User instance */ },
       ctx,
     ) {
       // ...
@@ -96,12 +96,14 @@ type Arguments = {
 // ```graphql
 // @ValidatorName(min: 5, really: true)
 // ```
-type ValidatorFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
+type TransformerFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
 ````
 
-## Transformers
+## Directives
 
-Transformers are all from [class-transformers](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
+NOTE: All directives will apply to input objects and fields. Many of these directives only make sense for one or the other but not both.
+
+Validations are from [class-validator](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
 
 ### @ValidateIsIn(in: [String | Int | Float]!)
 
