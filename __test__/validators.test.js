@@ -1,6 +1,6 @@
 const { makeExecutableSchema } = require('../src/transformer');
 const { graphql } = require('graphql');
-const { SIMPLE_SINGLE } = require('../src/inputValidators');
+const allValidators = require('../src/inputValidators');
 // for syntax highlighting...
 const { stripIndent: gql } = require('common-tags');
 
@@ -104,19 +104,51 @@ describe('validators', () => {
 
   // some of the simple single values
   [
-    { method: 'isAlpha', valid: 'foo', invalid: '1222' },
-    { method: 'isAlphanumeric', valid: 'foo', invalid: '1222--^^^^###' },
+    { method: 'ValidateIsAlpha', valid: 'foo', invalid: '1222' },
     {
-      method: 'isJSON',
+      method: 'ValidateIsAlphanumeric',
+      valid: 'foo',
+      invalid: '1222--^^^^###',
+    },
+    {
+      method: 'ValidateIsJSON',
       valid: JSON.stringify({ foo: 1 }),
       invalid: '1222--^^^^###',
     },
-  ].forEach(({ method, valid, invalid }) => {
+    {
+      method: 'ValidateLessThan',
+      valid: 1,
+      invalid: 200,
+      args: 'number: 101',
+      message: 'greater than 101',
+    },
+    {
+      method: 'ValidateGreaterThan',
+      valid: 200,
+      invalid: 1,
+      args: 'number: 101',
+      message: 'less than 101',
+    },
+    {
+      method: 'ValidateLength',
+      valid: 'aa',
+      invalid: 'aaaaaa',
+      args: 'min: 2, max: 5',
+      message: '2-5',
+    },
+    {
+      method: 'ValidateByteLength',
+      valid: 'aa',
+      invalid: 'aaaaaa',
+      args: 'min: 2, max: 5',
+      message: '2-5',
+    },
+  ].forEach(({ method, valid, invalid, message, args }) => {
     describe(method, () => {
       const schema = makeExecutableSchema({
         typeDefs: gql`
             input Input {
-              value: String! @${method}
+              value: String! @${method}${args ? `(${args})` : ''}
             }
 
             type Mutation {
@@ -133,11 +165,11 @@ describe('validators', () => {
         const result = await execute(schema, {
           input: { value: invalid },
         });
-        hasError(result, method);
+        hasError(result, message || method);
       });
 
       test('valid', async () => {
-        expect(SIMPLE_SINGLE).toContain(method);
+        expect(Object.keys(allValidators)).toContain(method);
         const result = await execute(schema, {
           input: { value: valid },
         });

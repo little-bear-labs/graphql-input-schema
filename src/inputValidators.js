@@ -1,5 +1,6 @@
 const { Validator } = require('class-validator');
 const validator = new Validator();
+const assert = require('assert');
 
 const SIMPLE_SINGLE = [
   'isAlpha',
@@ -43,11 +44,6 @@ const runValidatorSingleValue = (method, meta, value, args, err) => {
   }, value);
 };
 
-// eslint-disable-next-line
-function IsLength(value, config) {
-  return value;
-}
-
 function ValidateIsIn(value, { in: inputs }, meta) {
   return runValidatorSingleValue(
     'isIn',
@@ -68,19 +64,50 @@ function ValidateIsNotIn(value, { in: inputs }, meta) {
   );
 }
 
+function ValidateGreaterThan(value, { number }) {
+  if (value < number) throw new Error(`value is less than ${number}`);
+  return value;
+}
+
+function ValidateLessThan(value, { number }) {
+  if (value > number) throw new Error(`value is greater than ${number}`);
+  return value;
+}
+
+function ValidateLength(value, { min, max }, meta) {
+  return runValidatorSingleValue(
+    'length',
+    meta,
+    value,
+    [min, max],
+    () => `value must be between the length of ${min}-${max}`,
+  );
+}
+
+function ValidateByteLength(value, { min, max }, meta) {
+  return runValidatorSingleValue(
+    'isByteLength',
+    meta,
+    value,
+    [min, max],
+    () => `value must be between the btye length of ${min}-${max}`,
+  );
+}
+
 module.exports = {
-  IsLength,
+  ValidateLength,
+  ValidateByteLength,
   ValidateIsIn,
   ValidateIsNotIn,
-
-  // for testing....
-  SIMPLE_SINGLE,
+  ValidateLessThan,
+  ValidateGreaterThan,
 };
 
 SIMPLE_SINGLE.forEach(method => {
-  module.exports[method] = (value, _, meta) => {
+  const name = 'Validate' + method[0].toUpperCase() + method.slice(1);
+  module.exports[name] = (value, _, meta) => {
     return runValidatorSingleValue(method, meta, value, [], () => {
-      return `value fails pattern ${method}`;
+      return `value fails pattern ${name}`;
     });
   };
 });

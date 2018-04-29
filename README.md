@@ -10,44 +10,52 @@ Validate if value is in list of "in"
 
 Validate if value is not in list of "in"
 
-### @isAlpha
+### ValidateGreaterThan(number: Int!)
 
-### @isAlphanumeric
+### ValidateLessThan(number: Int!)
 
-### @isAscii
+### ValidateLength(min: Int!, max: Int!)
 
-### @isBase64
+### ValidateByteLength(min: Int!, max: Int!)
 
-### @isCreditCard
+### @ValidateIsAlpha
 
-### @isFullWidth
+### @ValidateIsAlphanumeric
 
-### @isHalfWidth
+### @ValidateIsAscii
 
-### @isVariableWidth
+### @ValidateIsBase64
 
-### @isHexColor
+### @ValidateIsCreditCard
 
-### @isHexadecimal
+### @ValidateIsFullWidth
 
-### @isISIN
+### @ValidateIsHalfWidth
 
-### @isISO8601
+### @ValidateIsVariableWidth
 
-### @isJSON
+### @ValidateIsHexColor
 
-### @isLowercase
+### @ValidateIsHexadecimal
 
-### @isMongoId
+### @ValidateIsISIN
 
-### @isMultibyte
+### @ValidateIsISO8601
 
-### @isSurrogatePair
+### @ValidateIsJSON
 
-### @isUppercase
+### @ValidateIsLowercase
 
-### @isMilitaryTime
+### @ValidateIsMongoId
 
-### @isPositive
+### @ValidateIsMultibyte
 
-### @isNegative
+### @ValidateIsSurrogatePair
+
+### @ValidateIsUppercase
+
+### @ValidateIsMilitaryTime
+
+### @ValidateIsPositive
+
+### @ValidateIsNegative
