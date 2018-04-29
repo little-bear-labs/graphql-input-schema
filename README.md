@@ -8,6 +8,8 @@ The directives used in this library are intended to be for for transformations, 
 
 The API is intended to be a drop in replacement for [graphql-tools](https://github.com/apollographql/graphql-tools) `makeExecutableSchema`.
 
+NOTE: You must depend on both `graphql` and `graphql-tools`. They are peer dependencies.
+
 ```js
 const { makeExecutableSchema } = require('graphql-super-schema');
 
