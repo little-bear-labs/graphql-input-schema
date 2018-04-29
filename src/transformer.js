@@ -4,16 +4,16 @@ const processInputs = require('./processInputs');
 const { extractName, resolveType } = require('./utils');
 
 function buildValidateArgHandler(typeMeta, transformer) {
-  return (value, config) => {
+  return async (value, config) => {
     if (typeMeta.nullable && value === null) return value;
     return transformer(value, config);
   };
 }
 
 function buildValidateArgHandlerArray(typeMeta, transformer) {
-  return (array, config) => {
+  return async (array, config) => {
     if (typeMeta.nullable && array === null) return array;
-    return array.map(value => transformer(value, config));
+    return Promise.all(array.map(value => transformer(value, config)));
   };
 }
 
@@ -56,19 +56,21 @@ function fieldToResolver(typeName, resolvers, field, inputTypes) {
     };
   }, {});
 
-  return (root, args, ctx, info) => {
-    const parsedArgs = Object.entries(args).reduce((sum, [key, value]) => {
+  return async (root, args, ctx, info) => {
+    const parsedArgs = {};
+
+    for (const [key, value] of Object.entries(args)) {
       assert(
         argHandlers[key],
         'missing argument handler this should never happen!',
       );
-      sum[key] = argHandlers[key](value, {
+      // XXX: These could run in parallel
+      parsedArgs[key] = await argHandlers[key](value, {
         context: ctx,
         info,
         args,
       });
-      return sum;
-    }, {});
+    }
 
     return resolver(root, parsedArgs, ctx, info);
   };

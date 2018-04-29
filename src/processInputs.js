@@ -2,33 +2,49 @@ const { visit } = require('graphql/language');
 const { extractName, extractArguments, typeInfo } = require('./utils');
 const debug = require('debug')('graphql-super-schema:inputs');
 
+async function reduceTransformers(
+  input,
+  value,
+  requestConfig,
+  transformers,
+  config,
+) {
+  for (const transformer of transformers) {
+    value = await transformer.function(value, transformer.args, {
+      type: input,
+      ...requestConfig,
+      ...config,
+    });
+  }
+  return value;
+}
+
 function createFieldTransformer(name, fields, config) {
-  return (object, requestConfig) => {
-    // do validation here later...
-    return Object.entries(object).reduce((sum, [key, value]) => {
+  return async (object, requestConfig) => {
+    const result = {};
+    for (const [key, value] of Object.entries(object)) {
       const { transformers } = fields[key];
-      sum[key] = transformers.reduce((currentValue, validator) => {
-        debug('register validator', name, key, validator.name);
-        return validator.function(currentValue, validator.args, {
-          type: fields[key],
-          ...requestConfig,
-          ...config,
-        });
-      }, value);
-      return sum;
-    }, {});
+      result[key] = await reduceTransformers(
+        fields[key],
+        value,
+        requestConfig,
+        transformers,
+        config,
+      );
+    }
+    return result;
   };
 }
 
 function createObjectTransformer(input, config) {
-  return (object, requestConfig) => {
-    return input.objectValidators.reduce((currentObject, validator) => {
-      return validator.function(currentObject, validator.args, {
-        type: input,
-        ...requestConfig,
-        ...config,
-      });
-    }, object);
+  return async (object, requestConfig) => {
+    return reduceTransformers(
+      input,
+      object,
+      requestConfig,
+      input.objectValidators,
+      config,
+    );
   };
 }
 
@@ -156,7 +172,7 @@ function processInput(source, doc, config) {
           field.transformers.push({
             name: 'nested',
             function: createFieldTransformer(
-              inputType.name,
+              inputType,
               inputMapping[inputType.name].fields,
               config,
             ),
@@ -177,11 +193,10 @@ function processInput(source, doc, config) {
         config,
       );
 
-      const transformer = (value, requestConfig) =>
-        objectTransformer(
-          fieldsTransformer(value, requestConfig),
-          requestConfig,
-        );
+      const transformer = async (value, requestConfig) => {
+        const fieldValue = await fieldsTransformer(value, requestConfig);
+        return objectTransformer(fieldValue, requestConfig);
+      };
 
       sum[inputName] = {
         ...input,
