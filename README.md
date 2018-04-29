@@ -68,6 +68,33 @@ const schema = makeExecutableSchema({
 });
 ```
 
+### Type signature for validator/transformer functions.
+
+````js
+type TypeMeta = {
+  nullable: boolean,
+  // GraphQL type name (such as String)
+  type: string,
+  // Is the type wrapped up in an Array?
+  list?: boolean,
+  // Is the GraphQL type a user created type ?
+  isCustomType: boolean,
+};
+
+type Arguments = {
+  [key: string]: mixed,
+};
+
+// Arguments are taken from the GraphQL arguments passed into the directive.
+// For example to get the arguments { min: 5, really: true } the following
+// would be passed.
+//
+// ```graphql
+// @ValidatorName(min: 5, really: true)
+// ```
+type ValidatorFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
+````
+
 ## Validators
 
 Validators are all from [class-validators](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.

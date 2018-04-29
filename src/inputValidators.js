@@ -109,6 +109,7 @@ function ValidateMaxLength(value, { max }, meta) {
 }
 
 function ValidateByteLength(value, { min, max }, meta) {
+  console.log(value, { min, max }, meta);
   return runValidatorSingleValue(
     'isByteLength',
     meta,
