@@ -6,7 +6,7 @@ The directives used in this library are intended to be for for transformations, 
 
 ## Usage
 
-The API is intended to be a drop in replacement for [graphql-tools](https://github.com/apollographql/graphql-tools) `makeExecutableSchema`.
+The API is intended to be a superset of `makeExecutableSchema` from [graphql-tools](https://github.com/apollographql/graphql-tools) `makeExecutableSchema`. Any option that can be passed into that function will also work here. This library is internally wrapping `makeExecutableSchema` after extracting information from the AST.
 
 NOTE: You must depend on both `graphql` and `graphql-tools`. They are peer dependencies.
 
