@@ -16,17 +16,6 @@ function extractName(node) {
   return node && node.name && node.name.value;
 }
 
-function extractDirectiveArg(source, directive, name, type) {
-  const found =
-    directive.arguments &&
-    directive.arguments.find(arg => {
-      return extractName(arg) === name;
-    });
-
-  if (!found) return null;
-  return extractValueType(source, found, type);
-}
-
 function extractArgumentValue(arg) {
   const { kind, value } = arg.value;
   switch (kind) {
@@ -97,7 +86,6 @@ function typeInfo(node) {
 module.exports = {
   extractValueType,
   extractName,
-  extractDirectiveArg,
   extractArguments,
   extractArgumentValue,
   typeInfo,

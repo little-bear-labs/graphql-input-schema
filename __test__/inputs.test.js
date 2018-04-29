@@ -53,7 +53,7 @@ describe('inputs', () => {
 
     const resolvers = deepMerge({}, resolverFixtures, {
       Mutation: {
-        createUser: (root, args) => {
+        createUser: () => {
           ranResolver = true;
         },
       },
@@ -170,7 +170,7 @@ describe('inputs', () => {
   it('array level transformers', async () => {
     const resolvers = deepMerge({}, resolverFixtures, {
       Mutation: {
-        createUser: (root, args) => {},
+        createUser: () => {},
       },
     });
 
@@ -184,7 +184,7 @@ describe('inputs', () => {
       },
     });
 
-    const result = await graphql({
+    await graphql({
       schema,
       source: `
         mutation foo($user: InputUser!) {
