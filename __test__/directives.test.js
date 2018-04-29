@@ -1,10 +1,10 @@
 const { makeExecutableSchema } = require('../src/transformer');
 const { graphql } = require('graphql');
-const allValidators = require('../src/inputValidators');
+const allValidators = require('../src/directives');
 // for syntax highlighting...
 const { stripIndent: gql } = require('common-tags');
 
-describe('validators', () => {
+describe('transformers', () => {
   const resolvers = {
     Mutation: {
       test: () => {},

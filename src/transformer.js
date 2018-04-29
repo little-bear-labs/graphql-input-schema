@@ -3,17 +3,17 @@ const { Source, parse: parseGQL } = require('graphql/language');
 const processInputs = require('./processInputs');
 const { extractName, resolveType } = require('./utils');
 
-function buildValidateArgHandler(typeMeta, validator) {
+function buildValidateArgHandler(typeMeta, transformer) {
   return (value, config) => {
     if (typeMeta.nullable && value === null) return value;
-    return validator(value, config);
+    return transformer(value, config);
   };
 }
 
-function buildValidateArgHandlerArray(typeMeta, validator) {
+function buildValidateArgHandlerArray(typeMeta, transformer) {
   return (array, config) => {
     if (typeMeta.nullable && array === null) return array;
-    return array.map(value => validator(value, config));
+    return array.map(value => transformer(value, config));
   };
 }
 
@@ -78,7 +78,7 @@ function makeExecutableSchema({
   typeDefs,
   resolvers = {},
   classes = {},
-  validators = {},
+  transformers = {},
   config = {},
   ...otherOptions
 }) {
@@ -88,9 +88,9 @@ function makeExecutableSchema({
   const baseConfig = {
     // we will add context based on the request later.
     classes,
-    validators: {
-      ...require('./inputValidators'),
-      ...validators,
+    transformers: {
+      ...require('./directives'),
+      ...transformers,
     },
     ...config,
   };

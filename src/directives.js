@@ -1,6 +1,6 @@
 const { Validator } = require('class-validator');
 const validator = new Validator();
-const debug = require('debug')('graphql-super-schema:validators');
+const debug = require('debug')('graphql-super-schema:transformers');
 
 const SIMPLE_SINGLE = [
   'isAlpha',
