@@ -23,11 +23,6 @@ describe('transformers', () => {
     });
   };
 
-  const hasError = (result, message) => {
-    expect(result.errors).toBeTruthy();
-    expect(result.errors[0].message).toMatch(message);
-  };
-
   test('transformer ordering', async () => {
     const schema = makeExecutableSchema({
       typeDefs: gql`
