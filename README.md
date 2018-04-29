@@ -1,3 +1,54 @@
+# GraphQL Super Schema
+
+This library uses AST rewriting techniques to provide directives for input types. The library comes with built in support to convert input types into classes (newables) and validate fields (nested & array support included) of input types. This is intended to cut down on boilerplate and make your graphql usage more declarative.
+
+Validators will raise informational errors without returning back values passed by the client if validators fail.
+
+## Usage
+
+The API is intended to be a drop in replacement for [graphql-tools](https://github.com/apollographql/graphql-tools) `makeExecutableSchema`.
+
+```js
+const { makeExecutableSchema } = require('graphql-super-schema');
+
+class UserCreation {
+  constructor(input) {
+    Object.assign(this, input);
+  }
+}
+
+const resolvers = {
+  Mutation: {
+    createUser(
+      root,
+      { user /* if validation passes this will be a User instance */ },
+      ctx,
+    ) {
+      // ...
+    },
+  },
+};
+
+const schema = makeExecutableSchema({
+  typeDefs: `
+    # your graphql schema as usual ...
+
+    # Additional functionality for input types
+    input CreateUser @class(name: "UserCreation") {
+      name: String!
+        @ValidateMinLength(min: 3)
+        @ValidateByteLength(min: 0, max: 255)
+    }
+
+    type Mutation {
+      createUser(user: CreateUser): ID!
+    }
+  `,
+  resolvers,
+  classes: { User },
+});
+```
+
 ## Validators
 
 Validators are all from [class-validators](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.

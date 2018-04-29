@@ -1,8 +1,9 @@
 {
   "name": "graphql-super-schema",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/transformer",
   "license": "MIT",
+  "keywords": ["graphql", "input types", "input", "rewriter", "directives"],
   "devDependencies": {
     "babel-eslint": "^8.2.3",
     "common-tags": "^1.7.2",
