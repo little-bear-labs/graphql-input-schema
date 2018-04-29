@@ -1,5 +1,5 @@
 {
-  "name": "graphql-super-schema",
+  "name": "graphql-input-schema",
   "version": "1.0.0",
   "main": "src/transformer",
   "license": "MIT",
