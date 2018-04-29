@@ -6,6 +6,7 @@ const {
   extractDirectiveArg,
   typeInfo,
 } = require('./utils');
+const debug = require('debug')('graphql-super-schema:inputs');
 
 function extractInputClass(source, directive) {
   if (extractName(directive) !== 'class') {
@@ -27,14 +28,14 @@ function extractInputClass(source, directive) {
 function createValidator(name, fields) {
   return object => {
     // do validation here later...
-    const out = Object.entries(object).reduce((sum, [key, value]) => {
+    return Object.entries(object).reduce((sum, [key, value]) => {
       const { fieldValidators } = fields[key];
       sum[key] = fieldValidators.reduce((sum, validator) => {
+        debug('register validator', name, key, validator.name);
         return validator.function(value, validator.args, fields[key]);
       }, value);
       return sum;
     }, {});
-    return out;
   };
 }
 
@@ -43,10 +44,13 @@ function processFieldDirective(source, field, node, { validators }) {
 
   // not our directive so return the node and move on.
   if (!validators[directiveName]) {
+    // eslint-disable-next-line
+    console.warn('Unknown validator', directiveName);
     return node;
   }
 
   field.fieldValidators.push({
+    name: directiveName,
     function: validators[directiveName],
     args: extractArguments(node.arguments),
   });
@@ -88,6 +92,7 @@ function processInput(source, doc, config) {
           return sum;
         }, {});
         inputMapping[inputObj.name] = inputObj;
+        debug('register type', inputObj);
         inputObj = null;
         return node;
       },
@@ -146,7 +151,9 @@ function processInput(source, doc, config) {
           // because field validators may reference other input field validators which
           // have not been fully resolved yet. Once this entire loop is finished _then_
           // the validator will be ready to be called.
+          debug('create nested validator', field.type, field.name);
           field.fieldValidators.push({
+            name: 'nested',
             function: createValidator(
               inputType.name,
               inputMapping[inputType.name].fields,

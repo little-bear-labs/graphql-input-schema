@@ -3,10 +3,7 @@ input InputUser @class(name: "User") {
   input: InputOfInput!
   inputAgain: InputOfInput
   enum: TheEnum
-  name: String!
-    @IsLength(min: 3)
-    @IsLength
-    @IsLength(str: "", str2: "2", float: 0.5, bool: true)
+  name: String! @ValidateMinLength(min: 3)
 }
 
 enum TheEnum {

@@ -42,6 +42,42 @@ describe('inputs', () => {
     });
   };
 
+  it('should throw error when validation fails', async () => {
+    let ranResolver = false;
+
+    const resolvers = deepMerge({}, resolverFixtures, {
+      Mutation: {
+        createUser: (root, args) => {
+          ranResolver = true;
+        },
+      },
+    });
+
+    const schema = loadSchema('inputs', resolvers);
+
+    const result = await graphql({
+      schema,
+      source: `
+        mutation foo($user: InputUser!) {
+          createUser(user: $user) {
+            id
+          }
+        }
+      `,
+      variableValues: {
+        user: {
+          name: 'a',
+          input: {
+            someThing: 1,
+          },
+        },
+      },
+    });
+
+    expect(ranResolver).not.toBeTruthy();
+    expect(result.errors).toBeTruthy();
+  });
+
   it('should transform user and users into classes', async () => {
     let ranResolver = false;
 

@@ -1,6 +1,6 @@
 const { Validator } = require('class-validator');
 const validator = new Validator();
-const assert = require('assert');
+const debug = require('debug')('graphql-super-schema:validators');
 
 const SIMPLE_SINGLE = [
   'isAlpha',
@@ -31,6 +31,7 @@ const SIMPLE_SINGLE = [
 
 const runValidator = (method, value, args, err) => {
   const result = validator[method](value, ...args);
+  debug('run validator', { method, value, result });
   if (!result) {
     throw new Error(err());
   }
