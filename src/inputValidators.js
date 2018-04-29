@@ -118,6 +118,14 @@ function ValidateByteLength(value, { min, max }, meta) {
   );
 }
 
+function classDirective(value, { name }, { classes }) {
+  const classConstructor = classes[name];
+  if (!classConstructor) {
+    throw new Error(`Class ${name} is not registered`);
+  }
+  return new classConstructor(value);
+}
+
 module.exports = {
   ValidateLength,
   ValidateByteLength,
@@ -127,6 +135,7 @@ module.exports = {
   ValidateGreaterThan,
   ValidateMinLength,
   ValidateMaxLength,
+  class: classDirective,
 };
 
 SIMPLE_SINGLE.forEach(method => {

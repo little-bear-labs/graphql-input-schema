@@ -1,7 +1,6 @@
 const assert = require('assert');
 const { Source, parse: parseGQL } = require('graphql/language');
 const processInputs = require('./processInputs');
-const inputValidators = require('./inputValidators');
 const { extractName, resolveType } = require('./utils');
 
 function validateValue(_, value, validator, classConstructor, config) {
@@ -29,21 +28,21 @@ function buildValidateArgHandlerArray(typeMeta, validator, classConstructor) {
 }
 
 function buildValidateHandler(input, typeMeta) {
-  if (!input || !input.validator) {
+  if (!input || !input.fieldsTransformer) {
     return value => value;
   }
 
   if (typeMeta.list) {
     return buildValidateArgHandlerArray(
       typeMeta,
-      input.validator,
+      input.fieldsTransformer,
       input.classConstructor,
     );
   }
 
   return buildValidateArgHandler(
     typeMeta,
-    input.validator,
+    input.fieldsTransformer,
     input.classConstructor,
   );
 }
@@ -108,7 +107,7 @@ function makeExecutableSchema({
     // we will add context based on the request later.
     classes,
     validators: {
-      ...inputValidators,
+      ...require('./inputValidators'),
       ...validators,
     },
     ...config,

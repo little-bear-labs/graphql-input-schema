@@ -8,29 +8,12 @@ const {
 } = require('./utils');
 const debug = require('debug')('graphql-super-schema:inputs');
 
-function extractInputClass(source, directive) {
-  if (extractName(directive) !== 'class') {
-    return null;
-  }
-
-  if (!directive) {
-    return null;
-  }
-
-  return extractDirectiveArg(
-    source,
-    directive,
-    constants.inputClassDirectiveArg,
-    'StringValue',
-  );
-}
-
-function createValidator(name, fields, config) {
+function createTransformer(name, fields, config) {
   return (object, requestConfig) => {
     // do validation here later...
     return Object.entries(object).reduce((sum, [key, value]) => {
-      const { fieldValidators } = fields[key];
-      sum[key] = fieldValidators.reduce((sum, validator) => {
+      const { transformers } = fields[key];
+      sum[key] = transformers.reduce((sum, validator) => {
         debug('register validator', name, key, validator.name);
         return validator.function(value, validator.args, {
           type: fields[key],
@@ -53,7 +36,7 @@ function processFieldDirective(source, field, node, { validators }) {
     return node;
   }
 
-  field.fieldValidators.push({
+  field.transformers.push({
     name: directiveName,
     function: validators[directiveName],
     args: extractArguments(node.arguments),
@@ -63,15 +46,23 @@ function processFieldDirective(source, field, node, { validators }) {
   return null;
 }
 
-function processInputDirective(source, input, node, { classes }) {
-  const classType = extractInputClass(source, node);
-  if (classType && !classes[classType]) {
-    throw new Error(`Unhandled class : ${classType}`);
-  }
-  input.classType = classType;
-  input.classConstructor = classes[classType];
+function processInputDirective(source, input, node, { validators }) {
+  const directiveName = extractName(node);
 
-  // input objects do not typically process directives. Delete the node.
+  // not our directive so return the node and move on.
+  if (!validators[directiveName]) {
+    // eslint-disable-next-line
+    console.warn('Unknown validator', directiveName);
+    return node;
+  }
+
+  input.objectValidators.push({
+    name: directiveName,
+    function: validators[directiveName],
+    args: extractArguments(node.arguments),
+  });
+
+  // once we've consumed the directive then we can remove the node.
   return null;
 }
 
@@ -107,7 +98,7 @@ function processInput(source, doc, config) {
         field = {
           name: extractName(node),
           ...typeInfo(node),
-          fieldValidators: [],
+          transformers: [],
         };
         return node;
       },
@@ -156,9 +147,9 @@ function processInput(source, doc, config) {
           // have not been fully resolved yet. Once this entire loop is finished _then_
           // the validator will be ready to be called.
           debug('create nested validator', field.type, field.name);
-          field.fieldValidators.push({
+          field.transformers.push({
             name: 'nested',
-            function: createValidator(
+            function: createTransformer(
               inputType.name,
               inputMapping[inputType.name].fields,
               config,
@@ -175,7 +166,7 @@ function processInput(source, doc, config) {
 
       sum[inputName] = {
         ...input,
-        validator: createValidator(inputName, inputFieldMap, config),
+        fieldsTransformer: createTransformer(inputName, inputFieldMap, config),
       };
 
       return sum;
