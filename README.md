@@ -169,7 +169,7 @@ Validations are from [class-validator](https://github.com/typestack/class-valida
 
 Validate if value is in list of "in"
 
-### @ValidateIsNoIn(in: [String | Int | Float]!)
+### @ValidateIsNotIn(in: [String | Int | Float]!)
 
 Validate if value is not in list of "in"
 
