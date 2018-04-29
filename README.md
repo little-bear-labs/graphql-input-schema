@@ -77,14 +77,24 @@ NOTE: If the element is `nullable` and the value is null transformers will not b
 ### Type signature for validator/transformer functions.
 
 ````js
-type TypeMeta = {
-  nullable: boolean,
-  // GraphQL type name (such as String)
-  type: string,
-  // Is the type wrapped up in an Array?
-  list?: boolean,
-  // Is the GraphQL type a user created type ?
-  isCustomType: boolean,
+type Config = {
+  type: {
+    nullable: boolean,
+    // GraphQL type name (such as String)
+    type: string,
+    // Is the type wrapped up in an Array?
+    list?: boolean,
+    // Is the GraphQL type a user created type ?
+    isCustomType: boolean,
+  },
+  // your graphql context object
+  context: any,
+  // your graphql info object
+  info: any,
+  // arguments to the resolver
+  args: Arguments,
+  // name to class constructor mapping
+  classes: { [key: string]: Object },
 };
 
 type Arguments = {
@@ -98,7 +108,7 @@ type Arguments = {
 // ```graphql
 // @ValidatorName(min: 5, really: true)
 // ```
-type TransformerFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
+type TransformerFn = (value: mixed, args: Arguments, config: Config) => mixed;
 ````
 
 ### Example of adding directives
@@ -122,11 +132,11 @@ const schema = makeExecutableSchema({
   `,
   resolvers,
   transformers: {
-    ToUpper(value) {
+    ToUpper(value, args, config) {
       return value.toUpperCase();
     },
 
-    AddField(value) {
+    AddField(value, args, config) {
       return {
         ...value,
         foo: 'qux',
@@ -134,7 +144,7 @@ const schema = makeExecutableSchema({
       };
     },
 
-    AddAnotherField(value) {
+    AddAnotherField(value, args, config) {
       return {
         ...value,
         foo: 'bar',
