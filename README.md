@@ -61,7 +61,8 @@ const schema = makeExecutableSchema({
   transformers: {
     // transformers are also "transformers" able to transform individual field values.
     toUpperCase: value => value.toUpperCase(),
-    ValidateIsFoo: value => {
+    // transformers can be async functions.
+    ValidateIsFoo: async value => {
       if (value !== 'foo') throw new Error('where is the foo?');
       // must return original or transformed value.
       return value;
@@ -108,7 +109,11 @@ type Arguments = {
 // ```graphql
 // @ValidatorName(min: 5, really: true)
 // ```
-type TransformerFn = (value: mixed, args: Arguments, config: Config) => mixed;
+type TransformerFn = (
+  value: mixed,
+  args: Arguments,
+  config: Config,
+) => Promise<mixed> | mixed;
 ````
 
 ### Example of adding directives

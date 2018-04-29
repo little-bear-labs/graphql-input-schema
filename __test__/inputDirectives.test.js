@@ -48,7 +48,7 @@ describe('transformers', () => {
         },
       }),
       transformers: {
-        AddField(value) {
+        async AddField(value) {
           return {
             ...value,
             foo: 'qux',
