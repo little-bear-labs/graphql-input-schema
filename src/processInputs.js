@@ -7,9 +7,9 @@ function createFieldTransformer(name, fields, config) {
     // do validation here later...
     return Object.entries(object).reduce((sum, [key, value]) => {
       const { transformers } = fields[key];
-      sum[key] = transformers.reduce((sum, validator) => {
+      sum[key] = transformers.reduce((currentValue, validator) => {
         debug('register validator', name, key, validator.name);
-        return validator.function(value, validator.args, {
+        return validator.function(currentValue, validator.args, {
           type: fields[key],
           ...requestConfig,
           ...config,
@@ -22,8 +22,8 @@ function createFieldTransformer(name, fields, config) {
 
 function createObjectTransformer(input, config) {
   return (object, requestConfig) => {
-    return input.objectValidators.reduce((sum, validator) => {
-      return validator.function(object, validator.args, {
+    return input.objectValidators.reduce((currentObject, validator) => {
+      return validator.function(currentObject, validator.args, {
         type: input,
         ...requestConfig,
         ...config,
