@@ -4,8 +4,8 @@ const processInputs = require('./processInputs');
 const inputValidators = require('./inputValidators');
 const { extractName, resolveType } = require('./utils');
 
-function validateValue(typeMeta, value, validator, classConstructor) {
-  const validatedValue = validator(value, typeMeta);
+function validateValue(_, value, validator, classConstructor) {
+  const validatedValue = validator(value);
   if (!classConstructor) {
     return validatedValue;
   }

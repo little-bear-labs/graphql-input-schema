@@ -30,7 +30,7 @@ function createValidator(name, fields) {
     const out = Object.entries(object).reduce((sum, [key, value]) => {
       const { fieldValidators } = fields[key];
       sum[key] = fieldValidators.reduce((sum, validator) => {
-        return validator.function(value, validator.args);
+        return validator.function(value, validator.args, fields[key]);
       }, value);
       return sum;
     }, {});
