@@ -101,6 +101,49 @@ type Arguments = {
 type TransformerFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
 ````
 
+### Example of adding directives
+
+```js
+const schema = makeExecutableSchema({
+  typeDefs: gql`
+    scalar JSON
+
+    input Input @AddField @AddAnotherField {
+      value: String! @ToUpper
+    }
+
+    type Mutation {
+      test(input: Input!): JSON
+    }
+
+    type Query {
+      test: String
+    }
+  `,
+  resolvers,
+  transformers: {
+    ToUpper(value) {
+      return value.toUpperCase();
+    },
+
+    AddField(value) {
+      return {
+        ...value,
+        foo: 'qux',
+        z: true,
+      };
+    },
+
+    AddAnotherField(value) {
+      return {
+        ...value,
+        foo: 'bar',
+      };
+    },
+  },
+});
+```
+
 ## Directives
 
 NOTE: All directives will apply to input objects and fields. Many of these directives only make sense for one or the other but not both.
