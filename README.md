@@ -68,6 +68,10 @@ const schema = makeExecutableSchema({
 });
 ```
 
+NOTE: The built in validators will (unless otherwise noted) iterate through arrays and validate each element. For maximum flexibility custom iterators must implement that functionality themselves if they wish to specifically validate elements instead of arrays. The `TypeMeta` will tell if you if the given type is an array.
+
+NOTE: If the element is `nullable` and the value is null validators will not be run.
+
 ### Type signature for validator/transformer functions.
 
 ````js
