@@ -49,6 +49,25 @@ const schema = makeExecutableSchema({
 });
 ```
 
+### Custom Validators
+
+In addition to the many built in validators it's easy to add more.
+
+```js
+const schema = makeExecutableSchema({
+  // ... stuff above
+  validators: {
+    // validators are also "transformers" able to transform individual field values.
+    toUpperCase: value => value.toUpperCase(),
+    ValidateIsFoo: value => {
+      if (value !== 'foo') throw new Error('where is the foo?');
+      // must return original or transformed value.
+      return value;
+    },
+  },
+});
+```
+
 ## Validators
 
 Validators are all from [class-validators](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
