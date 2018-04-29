@@ -4,6 +4,7 @@ input InputUser @class(name: "User") {
   inputAgain: InputOfInput
   enum: TheEnum
   name: String! @ValidateMinLength(min: 3)
+  array: [String] @CustomValidate
 }
 
 enum TheEnum {
