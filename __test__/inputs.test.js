@@ -176,7 +176,9 @@ describe('inputs', () => {
 
     let ranCustomValidate = false;
     const schema = loadSchema('inputs', resolvers, classes, {
-      CustomValidate(value) {
+      CustomValidate(value, args, config) {
+        expect(config.info).toBeTruthy();
+        expect(config.args).toBeTruthy();
         expect(value).toEqual(['a', 'b', 'c']);
         ranCustomValidate = true;
       },

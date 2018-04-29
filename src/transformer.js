@@ -1,54 +1,35 @@
 const assert = require('assert');
 const { Source, parse: parseGQL } = require('graphql/language');
 const processInputs = require('./processInputs');
-const inputValidators = require('./inputValidators');
 const { extractName, resolveType } = require('./utils');
 
-function validateValue(_, value, validator, classConstructor) {
-  const validatedValue = validator(value);
-  if (!classConstructor) {
-    return validatedValue;
-  }
-  return new classConstructor(validatedValue);
-}
-
-function buildValidateArgHandler(typeMeta, validator, classConstructor) {
-  return value => {
+function buildValidateArgHandler(typeMeta, validator) {
+  return (value, config) => {
     if (typeMeta.nullable && value === null) return value;
-    return validateValue(typeMeta, value, validator, classConstructor);
+    return validator(value, config);
   };
 }
 
-function buildValidateArgHandlerArray(typeMeta, validator, classConstructor) {
-  return array => {
+function buildValidateArgHandlerArray(typeMeta, validator) {
+  return (array, config) => {
     if (typeMeta.nullable && array === null) return array;
-    return array.map(value =>
-      validateValue(typeMeta, value, validator, classConstructor),
-    );
+    return array.map(value => validator(value, config));
   };
 }
 
-function buildValidateHandler(input, typeMeta) {
-  if (!input || !input.validator) {
+function buildFieldTransformer(input, typeMeta) {
+  if (!input || !input.transformer) {
     return value => value;
   }
 
   if (typeMeta.list) {
-    return buildValidateArgHandlerArray(
-      typeMeta,
-      input.validator,
-      input.classConstructor,
-    );
+    return buildValidateArgHandlerArray(typeMeta, input.transformer);
   }
 
-  return buildValidateArgHandler(
-    typeMeta,
-    input.validator,
-    input.classConstructor,
-  );
+  return buildValidateArgHandler(typeMeta, input.transformer);
 }
 
-function fieldToResolver(typeName, resolvers, field, { inputTypes }) {
+function fieldToResolver(typeName, resolvers, field, inputTypes) {
   const resolverType = resolvers[typeName];
   if (!resolverType) {
     throw new Error(`Resolvers are missing handlers for type: ${typeName}`);
@@ -71,7 +52,7 @@ function fieldToResolver(typeName, resolvers, field, { inputTypes }) {
 
     return {
       ...sum,
-      [name]: buildValidateHandler(input, typeMeta),
+      [name]: buildFieldTransformer(input, typeMeta),
     };
   }, {});
 
@@ -81,7 +62,11 @@ function fieldToResolver(typeName, resolvers, field, { inputTypes }) {
         argHandlers[key],
         'missing argument handler this should never happen!',
       );
-      sum[key] = argHandlers[key](value);
+      sum[key] = argHandlers[key](value, {
+        context: ctx,
+        info,
+        args,
+      });
       return sum;
     }, {});
 
@@ -94,22 +79,23 @@ function makeExecutableSchema({
   resolvers = {},
   classes = {},
   validators = {},
+  config = {},
   ...otherOptions
 }) {
   // XXX: yes we do end up parsing the source twice :/
   const source = new Source(typeDefs);
 
-  const [doc, inputTypes] = processInputs(source, parseGQL(source), {
+  const baseConfig = {
+    // we will add context based on the request later.
     classes,
     validators: {
+      ...require('./inputValidators'),
       ...validators,
-      ...inputValidators,
     },
-  });
-
-  const resolverConfig = {
-    inputTypes,
+    ...config,
   };
+
+  const [doc, inputTypes] = processInputs(source, parseGQL(source), baseConfig);
 
   // build the resolvers
   const topLevelResolvers = doc.definitions
@@ -122,7 +108,7 @@ function makeExecutableSchema({
             name,
             resolvers,
             field,
-            resolverConfig,
+            inputTypes,
           ),
           ...sum,
         }),
