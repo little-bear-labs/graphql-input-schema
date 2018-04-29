@@ -63,7 +63,7 @@ describe('inputs', () => {
 
     const schema = loadSchema('inputs', resolvers);
 
-    await graphql({
+    const result = await graphql({
       schema,
       source: `
         mutation foo($user: InputUser!) {
@@ -83,6 +83,7 @@ describe('inputs', () => {
     });
 
     expect(ranResolver).toBeTruthy();
+    expect(result.data).toBeTruthy();
   });
 
   it('should transform an array of users into classes', async () => {
@@ -121,5 +122,6 @@ describe('inputs', () => {
       },
     });
     expect(ranResolver).toBeTruthy();
+    expect(result.data).toBeTruthy();
   });
 });
