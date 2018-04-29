@@ -1,6 +1,6 @@
 const { visit } = require('graphql/language');
 const { extractName, extractArguments, typeInfo } = require('./utils');
-const debug = require('debug')('graphql-super-schema:inputs');
+const debug = require('debug')('graphql-input-schema:inputs');
 
 async function reduceTransformers(
   input,

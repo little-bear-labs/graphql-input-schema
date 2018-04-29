@@ -1,4 +1,4 @@
-# GraphQL Input Schema [![Build Status](https://travis-ci.org/ConduitVC/graphql-super-schema.svg?branch=master)](https://travis-ci.org/ConduitVC/graphql-super-schema)
+# GraphQL Input Schema [![Build Status](https://travis-ci.org/ConduitVC/graphql-input-schema.svg?branch=master)](https://travis-ci.org/ConduitVC/graphql-input-schema)
 
 This library uses AST rewriting techniques to provide directives for input types. The library comes with built in support to convert input types into classes (newables) and validate fields (nested & array support included) of input types. This is intended to cut down on boilerplate and make your graphql usage more declarative.
 
@@ -11,7 +11,7 @@ The API is intended to be a drop in replacement for [graphql-tools](https://gith
 NOTE: You must depend on both `graphql` and `graphql-tools`. They are peer dependencies.
 
 ```js
-const { makeExecutableSchema } = require('graphql-super-schema');
+const { makeExecutableSchema } = require('graphql-input-schema');
 
 class UserCreation {
   constructor(input) {
