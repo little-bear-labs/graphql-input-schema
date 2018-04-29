@@ -59,7 +59,6 @@ In addition to the many built in transformers it's easy to add more.
 const schema = makeExecutableSchema({
   // ... stuff above
   transformers: {
-    // transformers are also "transformers" able to transform individual field values.
     toUpperCase: value => value.toUpperCase(),
     // transformers can be async functions.
     ValidateIsFoo: async value => {
