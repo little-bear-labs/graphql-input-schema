@@ -25,14 +25,18 @@ function extractInputClass(source, directive) {
   );
 }
 
-function createValidator(name, fields) {
-  return object => {
+function createValidator(name, fields, config) {
+  return (object, requestConfig) => {
     // do validation here later...
     return Object.entries(object).reduce((sum, [key, value]) => {
       const { fieldValidators } = fields[key];
       sum[key] = fieldValidators.reduce((sum, validator) => {
         debug('register validator', name, key, validator.name);
-        return validator.function(value, validator.args, fields[key]);
+        return validator.function(value, validator.args, {
+          type: fields[key],
+          ...requestConfig,
+          ...config,
+        });
       }, value);
       return sum;
     }, {});
@@ -83,7 +87,7 @@ function processInput(source, doc, config) {
     InputObjectTypeDefinition: {
       enter(node) {
         const name = extractName(node);
-        inputObj = { name, fields: [] };
+        inputObj = { name, fields: [], objectValidators: [] };
         return node;
       },
       leave(node) {
@@ -157,6 +161,7 @@ function processInput(source, doc, config) {
             function: createValidator(
               inputType.name,
               inputMapping[inputType.name].fields,
+              config,
             ),
             args: {},
           });
@@ -170,7 +175,7 @@ function processInput(source, doc, config) {
 
       sum[inputName] = {
         ...input,
-        validator: createValidator(inputName, inputFieldMap),
+        validator: createValidator(inputName, inputFieldMap, config),
       };
 
       return sum;

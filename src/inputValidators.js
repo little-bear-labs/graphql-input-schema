@@ -39,7 +39,7 @@ const runValidator = (method, value, args, err) => {
 };
 
 const runValidatorSingleValue = (method, meta, value, args, err) => {
-  if (!meta.list) {
+  if (!meta.type.list) {
     return runValidator(method, value, args, err);
   }
 

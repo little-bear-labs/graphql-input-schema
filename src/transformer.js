@@ -4,8 +4,8 @@ const processInputs = require('./processInputs');
 const inputValidators = require('./inputValidators');
 const { extractName, resolveType } = require('./utils');
 
-function validateValue(_, value, validator, classConstructor) {
-  const validatedValue = validator(value);
+function validateValue(_, value, validator, classConstructor, config) {
+  const validatedValue = validator(value, config);
   if (!classConstructor) {
     return validatedValue;
   }
@@ -13,17 +13,17 @@ function validateValue(_, value, validator, classConstructor) {
 }
 
 function buildValidateArgHandler(typeMeta, validator, classConstructor) {
-  return value => {
+  return (value, config) => {
     if (typeMeta.nullable && value === null) return value;
-    return validateValue(typeMeta, value, validator, classConstructor);
+    return validateValue(typeMeta, value, validator, classConstructor, config);
   };
 }
 
 function buildValidateArgHandlerArray(typeMeta, validator, classConstructor) {
-  return array => {
+  return (array, config) => {
     if (typeMeta.nullable && array === null) return array;
     return array.map(value =>
-      validateValue(typeMeta, value, validator, classConstructor),
+      validateValue(typeMeta, value, validator, classConstructor, config),
     );
   };
 }
@@ -48,7 +48,7 @@ function buildValidateHandler(input, typeMeta) {
   );
 }
 
-function fieldToResolver(typeName, resolvers, field, { inputTypes }) {
+function fieldToResolver(typeName, resolvers, field, inputTypes) {
   const resolverType = resolvers[typeName];
   if (!resolverType) {
     throw new Error(`Resolvers are missing handlers for type: ${typeName}`);
@@ -81,7 +81,11 @@ function fieldToResolver(typeName, resolvers, field, { inputTypes }) {
         argHandlers[key],
         'missing argument handler this should never happen!',
       );
-      sum[key] = argHandlers[key](value);
+      sum[key] = argHandlers[key](value, {
+        context: ctx,
+        info,
+        args,
+      });
       return sum;
     }, {});
 
@@ -94,22 +98,23 @@ function makeExecutableSchema({
   resolvers = {},
   classes = {},
   validators = {},
+  config = {},
   ...otherOptions
 }) {
   // XXX: yes we do end up parsing the source twice :/
   const source = new Source(typeDefs);
 
-  const [doc, inputTypes] = processInputs(source, parseGQL(source), {
+  const baseConfig = {
+    // we will add context based on the request later.
     classes,
     validators: {
-      ...validators,
       ...inputValidators,
+      ...validators,
     },
-  });
-
-  const resolverConfig = {
-    inputTypes,
+    ...config,
   };
+
+  const [doc, inputTypes] = processInputs(source, parseGQL(source), baseConfig);
 
   // build the resolvers
   const topLevelResolvers = doc.definitions
@@ -122,7 +127,7 @@ function makeExecutableSchema({
             name,
             resolvers,
             field,
-            resolverConfig,
+            inputTypes,
           ),
           ...sum,
         }),
