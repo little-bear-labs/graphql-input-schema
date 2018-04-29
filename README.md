@@ -1,4 +1,4 @@
-# GraphQL Super Schema
+# GraphQL Super Schema [![Build Status](https://travis-ci.org/ConduitVC/graphql-super-schema.svg?branch=master)](https://travis-ci.org/ConduitVC/graphql-super-schema)
 
 This library uses AST rewriting techniques to provide directives for input types. The library comes with built in support to convert input types into classes (newables) and validate fields (nested & array support included) of input types. This is intended to cut down on boilerplate and make your graphql usage more declarative.
 
