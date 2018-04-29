@@ -2,7 +2,7 @@
 
 This library uses AST rewriting techniques to provide directives for input types. The library comes with built in support to convert input types into classes (newables) and validate fields (nested & array support included) of input types. This is intended to cut down on boilerplate and make your graphql usage more declarative.
 
-Validators will raise informational errors without returning back values passed by the client if validators fail.
+Transformers will raise informational errors without returning back values passed by the client if transformers fail.
 
 ## Usage
 
@@ -49,15 +49,15 @@ const schema = makeExecutableSchema({
 });
 ```
 
-### Custom Validators
+### Custom Transformers
 
-In addition to the many built in validators it's easy to add more.
+In addition to the many built in transformers it's easy to add more.
 
 ```js
 const schema = makeExecutableSchema({
   // ... stuff above
-  validators: {
-    // validators are also "transformers" able to transform individual field values.
+  transformers: {
+    // transformers are also "transformers" able to transform individual field values.
     toUpperCase: value => value.toUpperCase(),
     ValidateIsFoo: value => {
       if (value !== 'foo') throw new Error('where is the foo?');
@@ -68,9 +68,9 @@ const schema = makeExecutableSchema({
 });
 ```
 
-NOTE: The built in validators will (unless otherwise noted) iterate through arrays and validate each element. For maximum flexibility custom iterators must implement that functionality themselves if they wish to specifically validate elements instead of arrays. The `TypeMeta` will tell if you if the given type is an array.
+NOTE: The built in transformers will (unless otherwise noted) iterate through arrays and validate each element. For maximum flexibility custom iterators must implement that functionality themselves if they wish to specifically validate elements instead of arrays. The `TypeMeta` will tell if you if the given type is an array.
 
-NOTE: If the element is `nullable` and the value is null validators will not be run.
+NOTE: If the element is `nullable` and the value is null transformers will not be run.
 
 ### Type signature for validator/transformer functions.
 
@@ -99,9 +99,9 @@ type Arguments = {
 type ValidatorFn = (value: mixed, args: Arguments, meta: TypeMeta) => mixed;
 ````
 
-## Validators
+## Transformers
 
-Validators are all from [class-validators](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
+Transformers are all from [class-transformers](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
 
 ### @ValidateIsIn(in: [String | Int | Float]!)
 

@@ -78,7 +78,7 @@ function makeExecutableSchema({
   typeDefs,
   resolvers = {},
   classes = {},
-  validators = {},
+  transformers = {},
   config = {},
   ...otherOptions
 }) {
@@ -88,9 +88,9 @@ function makeExecutableSchema({
   const baseConfig = {
     // we will add context based on the request later.
     classes,
-    validators: {
-      ...require('./inputValidators'),
-      ...validators,
+    transformers: {
+      ...require('./directives'),
+      ...transformers,
     },
     ...config,
   };

@@ -32,11 +32,11 @@ function createObjectTransformer(input, config) {
   };
 }
 
-function processFieldDirective(source, field, node, { validators }) {
+function processFieldDirective(source, field, node, { transformers }) {
   const directiveName = extractName(node);
 
   // not our directive so return the node and move on.
-  if (!validators[directiveName]) {
+  if (!transformers[directiveName]) {
     // eslint-disable-next-line
     console.warn('Unknown validator', directiveName);
     return node;
@@ -44,7 +44,7 @@ function processFieldDirective(source, field, node, { validators }) {
 
   field.transformers.push({
     name: directiveName,
-    function: validators[directiveName],
+    function: transformers[directiveName],
     args: extractArguments(node.arguments),
   });
 
@@ -52,11 +52,11 @@ function processFieldDirective(source, field, node, { validators }) {
   return null;
 }
 
-function processInputDirective(source, input, node, { validators }) {
+function processInputDirective(source, input, node, { transformers }) {
   const directiveName = extractName(node);
 
   // not our directive so return the node and move on.
-  if (!validators[directiveName]) {
+  if (!transformers[directiveName]) {
     // eslint-disable-next-line
     console.warn('Unknown validator', directiveName);
     return node;
@@ -64,7 +64,7 @@ function processInputDirective(source, input, node, { validators }) {
 
   input.objectValidators.push({
     name: directiveName,
-    function: validators[directiveName],
+    function: transformers[directiveName],
     args: extractArguments(node.arguments),
   });
 
@@ -132,7 +132,7 @@ function processInput(source, doc, config) {
 
   const inputs = Object.entries(inputMapping).reduce(
     (sum, [inputName, input]) => {
-      // resolve any outstanding references to input types in the validators.
+      // resolve any outstanding references to input types in the transformers.
       const inputFieldMap = {};
       Object.values(input.fields)
         .map(field => {
@@ -149,7 +149,7 @@ function processInput(source, doc, config) {
           }
 
           // XXX: Note how this is modified by reference. This is very intentional
-          // because field validators may reference other input field validators which
+          // because field transformers may reference other input field transformers which
           // have not been fully resolved yet. Once this entire loop is finished _then_
           // the validator will be ready to be called.
           debug('create nested validator', field.type, field.name);

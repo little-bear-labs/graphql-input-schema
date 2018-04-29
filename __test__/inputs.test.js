@@ -33,7 +33,7 @@ describe('inputs', () => {
     fixture,
     resolvers,
     fixtureClasses = classes,
-    validators = {},
+    transformers = {},
   ) => {
     const raw = fs.readFileSync(
       __dirname + `/graphql/${fixture}.graphql`,
@@ -44,7 +44,7 @@ describe('inputs', () => {
       typeDefs: raw,
       resolvers,
       classes: fixtureClasses,
-      validators,
+      transformers,
     });
   };
 
@@ -167,7 +167,7 @@ describe('inputs', () => {
     expect(result.data).toBeTruthy();
   });
 
-  it('array level validators', async () => {
+  it('array level transformers', async () => {
     const resolvers = deepMerge({}, resolverFixtures, {
       Mutation: {
         createUser: (root, args) => {},
