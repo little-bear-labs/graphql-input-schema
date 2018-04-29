@@ -115,13 +115,13 @@ Validate if value is not in list of "in"
 
 ### @ValidateMaxLength(max: Int!)
 
-### ValidateGreaterThan(number: Int!)
+### @ValidateGreaterThan(number: Int!)
 
-### ValidateLessThan(number: Int!)
+### @ValidateLessThan(number: Int!)
 
-### ValidateLength(min: Int!, max: Int!)
+### @ValidateLength(min: Int!, max: Int!)
 
-### ValidateByteLength(min: Int!, max: Int!)
+### @ValidateByteLength(min: Int!, max: Int!)
 
 ### @ValidateIsAlpha
 
