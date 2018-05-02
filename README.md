@@ -47,7 +47,7 @@ const schema = makeExecutableSchema({
     }
   `,
   resolvers,
-  classes: { User },
+  classes: { UserCreation },
 });
 ```
 
