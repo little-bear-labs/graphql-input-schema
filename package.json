@@ -1,6 +1,6 @@
 {
   "name": "graphql-input-schema",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/transformer",
   "license": "MIT",
   "keywords": ["graphql", "input types", "input", "rewriter", "directives"],
