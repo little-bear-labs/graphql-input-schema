@@ -48,7 +48,7 @@ const runValidatorSingleValue = (method, meta, value, args, err) => {
   }, value);
 };
 
-function ValidateIsIn(value, { in: inputs }, meta) {
+function validateIsIn(value, { in: inputs }, meta) {
   return runValidatorSingleValue(
     'isIn',
     meta,
@@ -58,7 +58,7 @@ function ValidateIsIn(value, { in: inputs }, meta) {
   );
 }
 
-function ValidateIsNotIn(value, { in: inputs }, meta) {
+function validateIsNotIn(value, { in: inputs }, meta) {
   return runValidatorSingleValue(
     'isNotIn',
     meta,
@@ -68,17 +68,17 @@ function ValidateIsNotIn(value, { in: inputs }, meta) {
   );
 }
 
-function ValidateGreaterThan(value, { number }) {
+function validateGreaterThan(value, { number }) {
   if (value < number) throw new Error(`value is less than ${number}`);
   return value;
 }
 
-function ValidateLessThan(value, { number }) {
+function validateLessThan(value, { number }) {
   if (value > number) throw new Error(`value is greater than ${number}`);
   return value;
 }
 
-function ValidateLength(value, { min, max }, meta) {
+function validateLength(value, { min, max }, meta) {
   return runValidatorSingleValue(
     'length',
     meta,
@@ -88,7 +88,7 @@ function ValidateLength(value, { min, max }, meta) {
   );
 }
 
-function ValidateMinLength(value, { min }, meta) {
+function validateMinLength(value, { min }, meta) {
   return runValidatorSingleValue(
     'minLength',
     meta,
@@ -98,7 +98,7 @@ function ValidateMinLength(value, { min }, meta) {
   );
 }
 
-function ValidateMaxLength(value, { max }, meta) {
+function validateMaxLength(value, { max }, meta) {
   return runValidatorSingleValue(
     'maxLength',
     meta,
@@ -108,7 +108,7 @@ function ValidateMaxLength(value, { max }, meta) {
   );
 }
 
-function ValidateByteLength(value, { min, max }, meta) {
+function validateByteLength(value, { min, max }, meta) {
   return runValidatorSingleValue(
     'isByteLength',
     meta,
@@ -127,19 +127,19 @@ function classDirective(value, { name }, { classes }) {
 }
 
 module.exports = {
-  ValidateLength,
-  ValidateByteLength,
-  ValidateIsIn,
-  ValidateIsNotIn,
-  ValidateLessThan,
-  ValidateGreaterThan,
-  ValidateMinLength,
-  ValidateMaxLength,
+  validateLength,
+  validateByteLength,
+  validateIsIn,
+  validateIsNotIn,
+  validateLessThan,
+  validateGreaterThan,
+  validateMinLength,
+  validateMaxLength,
   class: classDirective,
 };
 
 SIMPLE_SINGLE.forEach(method => {
-  const name = 'Validate' + method[0].toUpperCase() + method.slice(1);
+  const name = 'validate' + method[0].toUpperCase() + method.slice(1);
   module.exports[name] = (value, _, meta) => {
     return runValidatorSingleValue(method, meta, value, [], () => {
       return `value fails pattern ${name}`;

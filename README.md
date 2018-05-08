@@ -38,8 +38,8 @@ const schema = makeExecutableSchema({
     # Additional functionality for input types
     input CreateUser @class(name: "UserCreation") {
       name: String!
-        @ValidateMinLength(min: 3)
-        @ValidateByteLength(min: 0, max: 255)
+        @validateMinLength(min: 3)
+        @validateByteLength(min: 0, max: 255)
     }
 
     type Mutation {
@@ -164,70 +164,70 @@ NOTE: All directives will apply to input objects and fields. Many of these direc
 
 Validations are from [class-validator](https://github.com/typestack/class-validator#manual-validation) see their documentation for more details.
 
-### @ValidateIsIn(in: [String | Int | Float]!)
+### @validateIsIn(in: [String | Int | Float]!)
 
 Validate if value is in list of "in"
 
-### @ValidateIsNotIn(in: [String | Int | Float]!)
+### @validateIsNotIn(in: [String | Int | Float]!)
 
 Validate if value is not in list of "in"
 
-### @ValidateMinLength(min: Int!)
+### @validateMinLength(min: Int!)
 
-### @ValidateMaxLength(max: Int!)
+### @validateMaxLength(max: Int!)
 
-### @ValidateGreaterThan(number: Int!)
+### @validateGreaterThan(number: Int!)
 
-### @ValidateLessThan(number: Int!)
+### @validateLessThan(number: Int!)
 
-### @ValidateLength(min: Int!, max: Int!)
+### @validateLength(min: Int!, max: Int!)
 
-### @ValidateByteLength(min: Int!, max: Int!)
+### @validateByteLength(min: Int!, max: Int!)
 
-### @ValidateIsAlpha
+### @validateIsAlpha
 
-### @ValidateIsAlphanumeric
+### @validateIsAlphanumeric
 
-### @ValidateIsAscii
+### @validateIsAscii
 
-### @ValidateIsBase64
+### @validateIsBase64
 
-### @ValidateIsCreditCard
+### @validateIsCreditCard
 
-### @ValidateIsEmail
+### @validateIsEmail
 
-### @ValidateIsFQDN
+### @validateIsFQDN
 
-### @ValidateIsURL
+### @validateIsURL
 
-### @ValidateIsFullWidth
+### @validateIsFullWidth
 
-### @ValidateIsHalfWidth
+### @validateIsHalfWidth
 
-### @ValidateIsVariableWidth
+### @validateIsVariableWidth
 
-### @ValidateIsHexColor
+### @validateIsHexColor
 
-### @ValidateIsHexadecimal
+### @validateIsHexadecimal
 
-### @ValidateIsISIN
+### @validateIsISIN
 
-### @ValidateIsISO8601
+### @validateIsISO8601
 
-### @ValidateIsJSON
+### @validateIsJSON
 
-### @ValidateIsLowercase
+### @validateIsLowercase
 
-### @ValidateIsMongoId
+### @validateIsMongoId
 
-### @ValidateIsMultibyte
+### @validateIsMultibyte
 
-### @ValidateIsSurrogatePair
+### @validateIsSurrogatePair
 
-### @ValidateIsUppercase
+### @validateIsUppercase
 
-### @ValidateIsMilitaryTime
+### @validateIsMilitaryTime
 
-### @ValidateIsPositive
+### @validateIsPositive
 
-### @ValidateIsNegative
+### @validateIsNegative
