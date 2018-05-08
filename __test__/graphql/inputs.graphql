@@ -3,7 +3,7 @@ input InputUser @class(name: "User") {
   input: InputOfInput!
   inputAgain: InputOfInput
   enum: TheEnum
-  name: String! @ValidateMinLength(min: 3)
+  name: String! @validateMinLength(min: 3)
   array: [String] @CustomValidate
 }
 

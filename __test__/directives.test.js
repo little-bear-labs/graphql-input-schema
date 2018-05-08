@@ -43,7 +43,7 @@ describe('transformers', () => {
     const schema = makeExecutableSchema({
       typeDefs: gql`
         input Input {
-          value: [String]! @ValidateIsIn(in: ["one", "two", "three"])
+          value: [String]! @validateIsIn(in: ["one", "two", "three"])
         }
 
         type Mutation {
@@ -74,7 +74,7 @@ describe('transformers', () => {
     const schema = makeExecutableSchema({
       typeDefs: gql`
         input Input {
-          value: [String]! @ValidateIsNotIn(in: ["one", "two", "three"])
+          value: [String]! @validateIsNotIn(in: ["one", "two", "three"])
         }
 
         type Mutation {
@@ -104,54 +104,54 @@ describe('transformers', () => {
 
   // some of the simple single values
   [
-    { method: 'ValidateIsAlpha', valid: 'foo', invalid: '1222' },
+    { method: 'validateIsAlpha', valid: 'foo', invalid: '1222' },
     {
-      method: 'ValidateIsAlphanumeric',
+      method: 'validateIsAlphanumeric',
       valid: 'foo',
       invalid: '1222--^^^^###',
     },
     {
-      method: 'ValidateIsJSON',
+      method: 'validateIsJSON',
       valid: JSON.stringify({ foo: 1 }),
       invalid: '1222--^^^^###',
     },
     {
-      method: 'ValidateLessThan',
+      method: 'validateLessThan',
       valid: 1,
       invalid: 200,
       args: 'number: 101',
       message: 'greater than 101',
     },
     {
-      method: 'ValidateGreaterThan',
+      method: 'validateGreaterThan',
       valid: 200,
       invalid: 1,
       args: 'number: 101',
       message: 'less than 101',
     },
     {
-      method: 'ValidateLength',
+      method: 'validateLength',
       valid: 'aa',
       invalid: 'aaaaaa',
       args: 'min: 2, max: 5',
       message: '2-5',
     },
     {
-      method: 'ValidateByteLength',
+      method: 'validateByteLength',
       valid: 'aa',
       invalid: 'aaaaaa',
       args: 'min: 2, max: 5',
       message: '2-5',
     },
     {
-      method: 'ValidateMinLength',
+      method: 'validateMinLength',
       valid: 'aa',
       invalid: 'a',
       args: 'min: 2',
       message: '2',
     },
     {
-      method: 'ValidateMaxLength',
+      method: 'validateMaxLength',
       invalid: 'aaa',
       valid: 'a',
       args: 'max: 2',
